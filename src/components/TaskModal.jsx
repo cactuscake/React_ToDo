@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { createTask, updateTask } from "../api/api";
 import { getSubordinates } from "../api/api";
-//import { AuthContext } from "../context/AuthContext";
 
 const TaskModal = ({ task, onClose }) => {
   const [formData, setFormData] = useState({
@@ -14,13 +13,8 @@ const TaskModal = ({ task, onClose }) => {
     responsible: task?.responsible_id || "",
   });
 
-  //console.log(task.responsible_id);
-  //console.log(formData.responsible);
-
   const [subordinates, setSubordinates] = useState([]); // Состояние для хранения подчиненных
-  //const { user } = useContext(AuthContext); // Предположим, что user содержит данные текущего пользователя
 
-  //console.log(user);
   // Загрузка подчиненных при монтировании компонента
   useEffect(() => {
     const fetchSubordinates = async () => {
@@ -38,24 +32,16 @@ const TaskModal = ({ task, onClose }) => {
   // Проверка, создана ли задача руководителем
   let isTaskCreatedByManager = true;
   subordinates.map((subordinate) => {
-    console.log(subordinate.id);
     if (task?.creatorId != subordinate?.id) {
       isTaskCreatedByManager = false;
     } else {
       isTaskCreatedByManager = true;
     }
   });
-
-  //console.log(task?.creator_id);
-  //console.log(isTaskCreatedByManager);
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    /*const taskData = {
-      ...formData,
-      creatorId: task ? task.creatorId : user.id, // Сохраняем создателя задачи
-    };*/
-
+    
     try {
       if (task) {
         // Если задача существует, обновляем её
