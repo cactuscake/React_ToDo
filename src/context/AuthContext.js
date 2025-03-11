@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
     }
   }, []);
-  //console.log(user)
+
   // Функция для проверки токена на сервере
   const validateToken = async (token) => {
     const response = await fetch('http://localhost:5000/api/auth/validate', {
