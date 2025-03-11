@@ -13,7 +13,6 @@ const TaskList = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      console.log("Пользователь авторизован");
       fetchTasks();
     } else {
       console.log("Пользователь не авторизован");
@@ -50,15 +49,15 @@ const TaskList = () => {
     switch (groupBy) {
       case "date":
         return {
-          today: tasks.filter((task) => task.dueDate === today),
+          today: tasks.filter((task) => task.due_date.split("T")[0] === today),
           week: tasks.filter(
-            (task) => task.dueDate > today && task.dueDate <= nextWeek
+            (task) => task.due_date > today && task.due_date <= nextWeek
           ),
-          future: tasks.filter((task) => task.dueDate > nextWeek),
+          future: tasks.filter((task) => task.due_date > nextWeek),
         };
       case "responsible":
         return tasks.reduce((acc, task) => {
-          const key = task.responsible || "Без ответственного";
+          const key = task.responsible_id || "Без ответственного";
           if (!acc[key]) acc[key] = [];
           acc[key].push(task);
           return acc;
@@ -82,8 +81,8 @@ const TaskList = () => {
               : "gray",
         }}
       >
-        <strong>{task.title}</strong> - {task.priority} - {task.due_date} -{" "}
-        {task.responsible_id} - {task.status}
+        <strong>{task.title}</strong> - {task.priority} -{" "}
+        {task.due_date.split("T")[0]} - {task.responsible_id} - {task.status}
       </li>
     ));
   };
@@ -91,7 +90,7 @@ const TaskList = () => {
   const groupedTasks = groupTasks(tasks, groupBy);
 
   return (
-    <div>
+    <div className="taskList">
       <h2>Список задач</h2>
       <button onClick={() => setIsModalOpen(true)}>Новая задача</button>
       <button onClick={logout}>Выйти</button>

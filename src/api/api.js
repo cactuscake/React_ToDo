@@ -56,3 +56,21 @@ export const login = async (credentials) => {
     });
     return response.json();
   };
+
+  export const getSubordinates = async () => {
+    const token = localStorage.getItem('token');
+  
+    const response = await fetch(`${API_BASE_URL}/api/users/subordinates`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  
+    if (!response.ok) {
+      throw new Error('Ошибка при загрузке подчиненных');
+    }
+  
+    const data = await response.json();
+    return data;
+  };
+  

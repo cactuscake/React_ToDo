@@ -1,19 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { createTask, updateTask } from "../api/api";
+import { getSubordinates } from "../api/api";
+//import { AuthContext } from "../context/AuthContext";
 
 const TaskModal = ({ task, onClose }) => {
   const [formData, setFormData] = useState({
     title: task?.title || "",
     description: task?.description || "",
-    dueDate: task?.dueDate || "",
+    dueDate:
+      task?.due_date.split("T")[0] || new Date().toISOString().split("T")[0],
     priority: task?.priority || "средний",
     status: task?.status || "к выполнению",
-    responsible: task?.responsible || "",
+    responsible: task?.responsible_id || "",
   });
 
+  //console.log(task.responsible_id);
+  //console.log(formData.responsible);
+
+  const [subordinates, setSubordinates] = useState([]); // Состояние для хранения подчиненных
+  //const { user } = useContext(AuthContext); // Предположим, что user содержит данные текущего пользователя
+
+  //console.log(user);
+  // Загрузка подчиненных при монтировании компонента
+  useEffect(() => {
+    const fetchSubordinates = async () => {
+      try {
+        const data = await getSubordinates();
+        setSubordinates(data);
+      } catch (error) {
+        console.error("Ошибка при загрузке подчиненных:", error);
+      }
+    };
+
+    fetchSubordinates();
+  }, []);
+
+  // Проверка, создана ли задача руководителем
+  let isTaskCreatedByManager = true;
+  subordinates.map((subordinate) => {
+    console.log(subordinate.id);
+    if (task?.creatorId != subordinate?.id) {
+      isTaskCreatedByManager = false;
+    } else {
+      isTaskCreatedByManager = true;
+    }
+  });
+
+  //console.log(task?.creator_id);
+  //console.log(isTaskCreatedByManager);
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+
+    /*const taskData = {
+      ...formData,
+      creatorId: task ? task.creatorId : user.id, // Сохраняем создателя задачи
+    };*/
+
     try {
       if (task) {
         // Если задача существует, обновляем её
@@ -47,6 +89,7 @@ const TaskModal = ({ task, onClose }) => {
           placeholder="Заголовок"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          disabled={isTaskCreatedByManager && task}
         />
         <textarea
           placeholder="Описание"
@@ -54,6 +97,7 @@ const TaskModal = ({ task, onClose }) => {
           onChange={(e) =>
             setFormData({ ...formData, description: e.target.value })
           }
+          disabled={isTaskCreatedByManager && task}
         />
         <input
           type="date"
@@ -61,12 +105,14 @@ const TaskModal = ({ task, onClose }) => {
           onChange={(e) =>
             setFormData({ ...formData, dueDate: e.target.value })
           }
+          disabled={isTaskCreatedByManager && task}
         />
         <select
           value={formData.priority}
           onChange={(e) =>
             setFormData({ ...formData, priority: e.target.value })
           }
+          disabled={isTaskCreatedByManager && task}
         >
           <option value="высокий">Высокий</option>
           <option value="средний">Средний</option>
@@ -81,14 +127,20 @@ const TaskModal = ({ task, onClose }) => {
           <option value="выполнена">Выполнена</option>
           <option value="отменена">Отменена</option>
         </select>
-        <input
-          type="text"
-          placeholder="Ответственный"
+        <select
           value={formData.responsible}
           onChange={(e) =>
             setFormData({ ...formData, responsible: e.target.value })
           }
-        />
+          disabled={isTaskCreatedByManager && task}
+        >
+          <option value="">Выберите ответственного</option>
+          {subordinates.map((subordinate) => (
+            <option key={subordinate.id} value={subordinate.id}>
+              {subordinate.first_name} {subordinate.last_name}
+            </option>
+          ))}
+        </select>
         <button type="submit">Сохранить</button>
         <button type="button" onClick={onClose}>
           Закрыть

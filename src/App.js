@@ -1,25 +1,20 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useContext } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import AuthForm from './components/AuthForm';
+import TaskList from './components/TaskList';
+import { AuthContext } from './context/AuthContext';
 
-function App() {
+const App = () => {
+  const { isAuthenticated } = useContext(AuthContext);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/tasks" /> : <AuthForm />} />
+        <Route path="/tasks" element={isAuthenticated ? <TaskList /> : <Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to={isAuthenticated ? '/tasks' : '/login'} />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
